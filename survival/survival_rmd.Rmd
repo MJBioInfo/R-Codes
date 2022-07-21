@@ -1,0 +1,94 @@
+---
+title: "survival"
+author: "MJ"
+date: "5/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DT)
+library(tidyverse)
+library(ggpubr)
+library(lubridate)
+library(survival)
+library(ggplot2)
+library(survminer)
+```
+
+
+
+
+```{r}
+# lets create dummy tibble for last surgery sx and last followup date sx fup
+
+date_ex = tibble (
+                  sx_date = c("2007-06-22", "2004-02-13", "2010-10-27"),
+                  last_fup_date = c("2017-04-15", "2018-07-04", "2016-10-31")
+                  )
+date_ex
+
+# class are chr but we need dates as date not chr , so formatting dates using base R as.date fun
+
+date_ex = date_ex %>% 
+                    mutate(
+                            sx_date = as.Date(sx_date),
+                            last_fup_date = as.Date(last_fup_date),
+                            
+                            os_yrs =as.numeric(difftime(last_fup_date, sx_date,  units = "days")) / 365.25
+                          )
+
+date_ex
+
+
+```
+```{r}
+
+table(lung$status)
+lung
+
+Surv(lung$time, lung$status)[1:10]
+
+f1 = survfit(Surv(time, status)~1, data = lung)
+f1
+names(f1)
+
+f1$n.event
+
+plot(f1, xlab = "Days", 
+     ylab = "Overall survival probability", mark.time = TRUE)
+
+
+ggsurvplot(f1, xlab = "Days", 
+     ylab = "Overall survival probability", mark.time = TRUE)
+
+# or we can use directly fit sunction Surv inside ggsurvplot
+
+ggsurvplot(
+  fit = survfit(Surv(time, status) ~1, data = lung),
+  xlab = "Days", 
+  ylab = "Overall survival probability"
+)
+
+
+summary(survfit(Surv(time, status) ~1, data = lung), times = 365.25) #(  in this survival 0,409 = 40.9 % survival rate for 1 year )
+
+f2 = survfit(Surv(time, status)~1, data = lung)
+f2
+
+
+SDS = survfit(Surv(time, status)~sex , data = lung)
+
+SDS
+summary(SDS)$table
+
+survdiff(Surv(time, status)~sex, data = lung)
+ggsurvplot(SDS, color = "strata", linetype = "strata", conf.int = TRUE, pval = TRUE, risk.table = "abs_pct", surv.median.line = "hv", cumevents = FALSE, combine = TRUE, break.time.by = 200, ncensor.plot =TRUE, legend.labs = c("Male", "Female"))
+
+
+
+```
+
