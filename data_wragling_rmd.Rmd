@@ -1,0 +1,91 @@
+---
+title: "data_wragling"
+author: "MJ"
+date: "8/28/2021"
+output: html_document
+---
+
+```{r}
+
+library(pacman)
+library(wakefield)
+library(ggplot2)
+library(tidyverse)
+library(stringr)
+library(ComplexHeatmap)
+library(compare)
+library(plotly)
+library(ggrepel)
+library(volcano3D)
+library(ggpubr)
+library(nycflights13)
+
+```
+
+
+```{r}
+iris
+dplyr::tbl_df(iris)
+dplyr::as_tibble(iris)
+tibble::as.tibble(iris)
+dplyr::glimpse(iris)
+summary(iris)
+
+iris %>%group_by(Species) %>% summarise(mean(Sepal.Length))
+
+tidyr::gather(data = iris, "Features", "values", Sepal.Length,Petal.Length, Sepal.Width)
+
+tidyr::pivot_longer(data = iris, cols = Sepal.Length:Petal.Width, names_to = "Feature", values_to = "data", values_drop_na = TRUE)
+
+
+iris %>% rename( Length= Sepal.Length, goup=Species  )
+
+iris %>% filter(Sepal.Length > 4.9 , Sepal.Width >3.5, Species == "virginica")
+
+
+```
+
+```{r}
+
+dplyr::glimpse(flights)
+
+flights
+table(flights$carrier)
+
+table((flights %>% filter(dest=="LAS" & month == 1 ))$carrier)
+
+
+flights %>% filter(carrier %in% c("AA", "US", "EV"))
+
+flight2 = flights$origin %>% str_replace("JFK", "KKK")
+flight2
+
+flights %>% arrange((time_hour))
+
+flights %>% select("carrier", "origin", "dest")
+
+flights %>% select("origin","dest", starts_with("arr_time"), everything())
+
+flights=flights %>% mutate(mean_dep_delay= mean(dep_delay))
+
+sum(is.na(flights$dep_delay))
+
+flights=flights %>% mutate(Late=if_else(condition = (dep_delay >= 2 && arr_delay >=10), true = "Too late", false = "not_late"))
+
+flights=flights %>%  mutate(Late = if_else(condition = (dep_delay<2 & arr_delay <10), true = "Not Too late", false = "not"))
+
+table(flights$Late)
+
+flights=flights %>% mutate(Late2 = case_when( 
+                                        (dep_delay>2 & arr_delay >10) ~ "too_late",
+                                        (dep_delay <2 &arr_delay <10) ~ "Not_too_late",
+                                        TRUE~ "late"
+                                
+                                              
+                                              ))
+
+
+
+```
+
+
